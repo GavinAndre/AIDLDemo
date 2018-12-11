@@ -71,6 +71,8 @@ class BookManagerActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         unBindService()
+        //防止内存泄露
+        mHandler.removeCallbacksAndMessages(null)
         super.onDestroy()
     }
 
