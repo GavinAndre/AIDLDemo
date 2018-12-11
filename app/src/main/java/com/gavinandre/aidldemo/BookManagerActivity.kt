@@ -4,7 +4,10 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
-import android.os.*
+import android.os.Bundle
+import android.os.Handler
+import android.os.IBinder
+import android.os.RemoteException
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.widget.Toast
@@ -56,8 +59,8 @@ class BookManagerActivity : AppCompatActivity() {
                         } ?: 1
                         val id = it.tag as Int
                         val newBook = Book(id, "Book$id")
-                        addBook(newBook)
                         Log.i(TAG, "add book: $newBook")
+                        addBook(newBook)
                     }
                 } catch (e: RemoteException) {
                     e.printStackTrace()
@@ -108,14 +111,11 @@ class BookManagerActivity : AppCompatActivity() {
         }
     }
 
-    private val mHandler = object : Handler() {
-        override fun handleMessage(msg: Message?) {
-            msg?.apply {
-                when (what) {
-                    MESSAGE_NEW_BOOK_ARRIVED -> Log.i(TAG, "receive new book: ${msg.obj}")
-                }
-            } ?: super.handleMessage(msg)
+    private val mHandler = Handler { msg ->
+        when (msg.what) {
+            MESSAGE_NEW_BOOK_ARRIVED -> Log.i(TAG, "receive new book: ${msg.obj}")
         }
+        false
     }
 
     private val mDeathRecipient = object : IBinder.DeathRecipient {
