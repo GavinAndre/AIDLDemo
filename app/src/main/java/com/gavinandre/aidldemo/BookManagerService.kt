@@ -25,7 +25,8 @@ class BookManagerService : Service() {
     }
 
     override fun onBind(intent: Intent): IBinder? {
-        //验证权限，没有声明该权限则不返回binder
+        //验证权限方式1
+        //在onBind函数中做验证，没有声明该权限则不返回binder
         checkCallingOrSelfPermission(ACCESS_BOOK_SERVICE_PERMISSION)
             .takeIf { it == PackageManager.PERMISSION_DENIED }
             ?.let {
@@ -71,7 +72,8 @@ class BookManagerService : Service() {
         }
 
         override fun onTransact(code: Int, data: Parcel, reply: Parcel?, flags: Int): Boolean {
-            //验证权限，没有声明该权限则返回false
+            //验证权限方式2
+            //在onTransact函数中做验证，没有声明该权限则返回false
             checkCallingOrSelfPermission(ACCESS_BOOK_SERVICE_PERMISSION)
                 .takeIf { it == PackageManager.PERMISSION_DENIED }
                 ?.let {
@@ -79,6 +81,7 @@ class BookManagerService : Service() {
                     return false
                 }
 
+            //验证权限方式3
             //验证包名前缀，不相等则返回false
             packageManager.getPackagesForUid(getCallingUid())
                 ?.takeIf { it.isNotEmpty() }
