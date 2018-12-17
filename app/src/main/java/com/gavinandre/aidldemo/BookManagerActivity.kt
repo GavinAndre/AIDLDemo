@@ -95,6 +95,7 @@ class BookManagerActivity : AppCompatActivity() {
             Log.e(TAG, "onServiceConnected: $mRemoteBookManager")
             try {
                 mRemoteBookManager?.registerListener(mOnNewBookArrivedListener)
+                //设置死亡代理
                 mRemoteBookManager?.asBinder()?.linkToDeath(mDeathRecipient, 0)
             } catch (e: RemoteException) {
                 e.printStackTrace()
@@ -123,6 +124,7 @@ class BookManagerActivity : AppCompatActivity() {
     private val mDeathRecipient = object : IBinder.DeathRecipient {
         override fun binderDied() {
             Log.d(TAG, "binder died. ThreadName: ${Thread.currentThread().name}")
+            //移除死亡代理
             mRemoteBookManager?.asBinder()?.unlinkToDeath(this, 0)
             mRemoteBookManager = null
             // TODO:这里重新绑定远程Service
