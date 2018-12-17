@@ -38,7 +38,7 @@ class BookManagerActivity : AppCompatActivity() {
     private fun initListener() {
         btnGetBookList.setOnClickListener {
             Toast.makeText(this, "GetBookList", Toast.LENGTH_SHORT).show()
-            Thread(Runnable {
+            Thread {
                 try {
                     mRemoteBookManager?.let { mRemoteBookManager ->
                         val list = mRemoteBookManager.bookList
@@ -47,11 +47,11 @@ class BookManagerActivity : AppCompatActivity() {
                 } catch (e: RemoteException) {
                     e.printStackTrace()
                 }
-            }).start()
+            }.start()
         }
         btnAddBook.setOnClickListener {
             Toast.makeText(this, "AddBook", Toast.LENGTH_SHORT).show()
-            Thread(Runnable {
+            Thread {
                 try {
                     mRemoteBookManager?.apply {
                         it.tag = it.tag?.run {
@@ -65,7 +65,7 @@ class BookManagerActivity : AppCompatActivity() {
                 } catch (e: RemoteException) {
                     e.printStackTrace()
                 }
-            }).start()
+            }.start()
         }
     }
 
