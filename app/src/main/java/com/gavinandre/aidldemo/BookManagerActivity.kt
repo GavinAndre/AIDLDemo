@@ -29,12 +29,14 @@ class BookManagerActivity : AppCompatActivity() {
         initListener()
     }
 
+    //绑定远程服务端
     private fun bindService() {
         val intent = Intent(this, BookManagerService::class.java)
         intent.setPackage(packageName)
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE)
     }
 
+    //注册按钮监听，调用远程耗时方法需要开启线程
     private fun initListener() {
         btnGetBookList.setOnClickListener {
             Toast.makeText(this, "GetBookList", Toast.LENGTH_SHORT).show()
@@ -88,12 +90,15 @@ class BookManagerActivity : AppCompatActivity() {
         unbindService(mConnection)
     }
 
+    //服务端连接状态回调
     private var mConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             Log.e(TAG, "onServiceConnected: $mRemoteBookManager")
+            //将服务端返回的Binder对象转换为aidl对象
             mRemoteBookManager = IBookManager.Stub.asInterface(service)
             Log.e(TAG, "onServiceConnected: $mRemoteBookManager")
             try {
+                //注册AIDL回调接口
                 mRemoteBookManager?.registerListener(mOnNewBookArrivedListener)
                 //设置死亡代理
                 mRemoteBookManager?.asBinder()?.linkToDeath(mDeathRecipient, 0)
@@ -108,12 +113,15 @@ class BookManagerActivity : AppCompatActivity() {
         }
     }
 
+    //aidl接口回调
     private val mOnNewBookArrivedListener = object : IOnNewBookArrivedListener.Stub() {
         override fun onNewBookArrived(newBook: Book?) {
+            //obtainMessage可以复用Message，减少开销
             mHandler.obtainMessage(MESSAGE_NEW_BOOK_ARRIVED, newBook).sendToTarget()
         }
     }
 
+    //使用lambda简化创建handler
     private val mHandler = Handler { msg ->
         when (msg.what) {
             MESSAGE_NEW_BOOK_ARRIVED -> Log.i(TAG, "receive new book: ${msg.obj}")
@@ -121,6 +129,7 @@ class BookManagerActivity : AppCompatActivity() {
         false
     }
 
+    //死亡代理回调
     private val mDeathRecipient = object : IBinder.DeathRecipient {
         override fun binderDied() {
             Log.d(TAG, "binder died. ThreadName: ${Thread.currentThread().name}")
@@ -128,6 +137,7 @@ class BookManagerActivity : AppCompatActivity() {
             mRemoteBookManager?.asBinder()?.unlinkToDeath(this, 0)
             mRemoteBookManager = null
             // TODO:这里重新绑定远程Service
+            //bindService()
         }
     }
 
